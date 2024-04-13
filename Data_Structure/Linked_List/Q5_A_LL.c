@@ -8,6 +8,7 @@ Purpose: Implementing the required functions for Question 5 */
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -103,6 +104,17 @@ int main()
 void frontBackSplitLinkedList(LinkedList *ll, LinkedList *resultFrontList, LinkedList *resultBackList)
 {
 	/* add your code here */
+	if (ll->head == NULL) return;
+	int half = ceil((double)ll->size/2);
+	ListNode * cur = ll->head;
+	for (int i = 0; i < half; i++) {
+		insertNode(resultFrontList,resultFrontList->size,cur->item);
+		cur = cur->next;
+	}
+	while (cur !=NULL){
+		insertNode(resultBackList,resultBackList->size,cur->item);
+		cur = cur->next;
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

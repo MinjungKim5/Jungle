@@ -85,10 +85,28 @@ int main()
 
 ////////////////////////////////////////////////////////////////////////
 
+ListNode * exchange(ListNode * pre) {
+	ListNode * cur = pre->next;
+	if (cur->next == NULL) {
+		cur->next = pre;
+		return cur;
+	}
+	else {
+		ListNode * tail = exchange(cur);
+		cur -> next = pre;
+		return tail;
+	}
+}
+
+
 void RecursiveReverse(ListNode **ptrHead)
 {
 	/* add your code here */
+	ListNode * old_head = *ptrHead;
+	*ptrHead = exchange(*ptrHead);
+	old_head ->next = NULL;
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////
 
