@@ -110,6 +110,14 @@ int main()
 void recursiveReverse(Queue *q)
 {
 /* add your code here */
+	if (isEmptyQueue(q)) return;
+	Queue tmp_q;
+	tmp_q.ll.head = NULL;
+	tmp_q.ll.size = 0;
+	int size = q->ll.size;
+	for (int i = 1; i < size; i++) enqueue(&tmp_q, dequeue(q));
+	recursiveReverse(&tmp_q);
+	while (isEmptyQueue(&tmp_q)!=1) enqueue(q, dequeue(&tmp_q));
 }
 
 //////////////////////////////////////////////////////////////////
