@@ -104,6 +104,20 @@ int sumOfOddNodes(BTNode *node)
 
 {
     /* add your code here */
+    Stack stack;
+    stack.top = NULL;
+    Stack *stk = &stack;
+    if (node == NULL) return 0;
+    push(stk, node);
+    int count_odd = 0;
+    while(stack.top != NULL){
+        BTNode *cur_node = pop(stk);
+        int num = cur_node->item;
+        if (num % 2 == 1) count_odd += num;
+        if (cur_node->left !=NULL) push(stk,cur_node->left);
+        if (cur_node->right != NULL) push(stk,cur_node->right);
+    }
+    return count_odd;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

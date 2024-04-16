@@ -103,6 +103,20 @@ int main()
 int smallestValue(BTNode *node)
 {
 	/* add your code here */
+    Stack stack;
+    stack.top = NULL;
+    Stack *stk = &stack;
+    if (node == NULL) return 0;
+    push(stk, node);
+    int min = node->item;
+    while(stack.top != NULL){
+        BTNode *cur_node = pop(stk);
+        int num = cur_node->item;
+        if (num<min) min = num;
+        if (cur_node->right != NULL) push(stk,cur_node->right);
+        if (cur_node->left !=NULL) push(stk,cur_node->left);
+    }
+    return min;
 }
 
 //////////////////////////////////////////////////////////////////////////////////

@@ -106,6 +106,21 @@ int main()
 void mirrorTree(BTNode *node)
 {
 	/* add your code here */
+    Stack stack;
+    stack.top = NULL;
+    Stack *stk = &stack;
+    if (node == NULL) return;
+    push(stk, node);
+    int count_odd = 0;
+    while(stack.top != NULL){
+        BTNode *cur_node = pop(stk);
+        BTNode *temp_node = cur_node->left;
+        cur_node->left = cur_node->right;
+        cur_node->right = temp_node;
+        if (cur_node->left !=NULL) push(stk,cur_node->left);
+        if (cur_node->right != NULL) push(stk,cur_node->right);
+    }
+    return;
 }
 
 //////////////////////////////////////////////////////////////////////////////////
