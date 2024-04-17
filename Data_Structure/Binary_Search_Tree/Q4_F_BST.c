@@ -89,9 +89,52 @@ int main()
 
 //////////////////////////////////////////////////////////////////////////////////
 
+// 링크를 자르면서 비지티드 처리
+void postOrderIterativeS1_cutTree(BSTNode *root)
+{
+	/* add your code here */
+	Stack to_visit_stack;
+	to_visit_stack.top = NULL;
+	Stack *tvst = &to_visit_stack;
+	push(tvst, root);
+	while(tvst->top !=NULL){
+		BSTNode *parent = peek(tvst);
+		if(parent->left == NULL && parent->right == NULL) printf("%d ",pop(tvst)->item);
+		if(parent->right != NULL) push(tvst, parent->right);
+		if(parent->left != NULL) push(tvst, parent->left);
+		parent->left = NULL;
+		parent->right = NULL;
+	}
+}
+
 void postOrderIterativeS1(BSTNode *root)
 {
-	 /* add your code here */
+	/* add your code here */
+	Stack to_visit_stack;
+	to_visit_stack.top = NULL;
+	Stack *tvst = &to_visit_stack;
+	BSTNode *last_pop = NULL;
+	push(tvst, root);
+	while(tvst->top !=NULL){
+		BSTNode *parent = peek(tvst);
+		if(parent->left == NULL && parent->right == NULL) {
+			last_pop = pop(tvst);
+			printf("%d ",last_pop->item);
+			continue;
+		}
+		if(parent->right != NULL && last_pop !=parent->right) push(tvst, parent->right);
+		else if (parent->right != NULL && last_pop == parent->right) {
+			last_pop = pop(tvst);
+			printf("%d ", last_pop->item);
+			continue;
+		}
+		if(parent->left != NULL && last_pop !=parent->left) push(tvst, parent->left);
+		else if (parent->left != NULL && last_pop == parent->left) {
+			last_pop = pop(tvst);
+			printf("%d ", last_pop->item);
+			continue;
+		}
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////

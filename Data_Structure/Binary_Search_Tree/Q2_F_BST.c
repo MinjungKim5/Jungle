@@ -91,6 +91,25 @@ int main()
 void inOrderTraversal(BSTNode *root)
 {
 	 /* add your code here */
+	Stack to_visit_stack;
+	to_visit_stack.top = NULL;
+	Stack *tvstk = &to_visit_stack;
+	Stack visited_stack;
+	visited_stack.top = NULL;
+	Stack *vstk = &visited_stack;
+
+	push(tvstk, root);
+	while(tvstk->top != NULL){
+		BSTNode *cur_node = pop(tvstk);
+		if (cur_node->right != NULL) push(tvstk, cur_node->right);
+		if (cur_node->left != NULL) push(tvstk, cur_node->left);
+		while((vstk->top!=NULL) && (cur_node->item >= vstk->top->data->item)){
+			BSTNode *parent_node = pop(vstk);
+			printf("%d ", parent_node->item);
+		}
+		push(vstk, cur_node);
+	}
+	while(vstk->top!=NULL) printf("%d ", pop(vstk)->item);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
