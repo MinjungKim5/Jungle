@@ -111,7 +111,6 @@ void printSmallerValues(BTNode *node, int m)
     Stack *stk = &stack;
     if (node == NULL) return;
     push(stk, node);
-    int count_odd = 0;
     while(stack.top != NULL){
         BTNode *cur_node = pop(stk);
         int num = cur_node->item;
