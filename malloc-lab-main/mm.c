@@ -40,7 +40,7 @@ team_t team = {
 #define DWORD (2*WORD)
 #define CHUNKSIZE (1<<12)
 #define MAX(x, y)   ((x) > y ? (x) : (y))
-#define HFPACK(size, alloc)     ((size) | (alloc))
+#define PACK(size, alloc)     ((size) | (alloc))
 #define GET(p)      (*(unsigned int *) (p))
 #define PUT(p, val)     (*(unsigned int *) (p) = (val))
 #define GET_SIZE(p)     (GET(p) & ~0x7)
@@ -82,9 +82,9 @@ static void *extend_heap(size_t words)
     size = (words % 2) ? (words+1) * WORD : words * WORD;
     if ((long)(bp = mem_sbrk(size)) == -1) return NULL;
 
-    PUT(HP(bp), HFPACK(size, 0));
-    PUT(FP(bp), HFPACK(size, 0));
-    PUT(HP(NEXT_BLOCK(bp)), HFPACK(0,1));
+    PUT(HP(bp), PACK(size, 0));
+    PUT(FP(bp), PACK(size, 0));
+    PUT(HP(NEXT_BLOCK(bp)), PACK(0,1));
 
     return coalesce(bp);
 }
@@ -96,9 +96,9 @@ int mm_init(void)
 {
     if ((heap_listp = mem_sbrk(4*WORD)) == (void *) -1) return -1;
     PUT(heap_listp, 0);
-    PUT(heap_listp + 1*WORD, HFPACK(DWORD,1));
-    PUT(heap_listp + 2*WORD, HFPACK(DWORD,1));
-    PUT(heap_listp + 3*WORD, HFPACK(0,1));
+    PUT(heap_listp + 1*WORD, PACK(DWORD,1));
+    PUT(heap_listp + 2*WORD, PACK(DWORD,1));
+    PUT(heap_listp + 3*WORD, PACK(0,1));
     heap_listp += DWORD;
 
     if (extend_heap(CHUNKSIZE/WORD) == NULL) return -1;
@@ -152,8 +152,8 @@ void mm_free(void *bp)
 {
     size_t size = GET_SIZE(HP(bp));
 
-    PUT(HP(bp), HFPACK(size, 0));
-    PUT(FP(bp), HFPACK(size, 0));
+    PUT(HP(bp), PACK(size, 0));
+    PUT(FP(bp), PACK(size, 0));
     coalesce(bp);
 
 }
@@ -161,22 +161,39 @@ void mm_free(void *bp)
 /*
  * mm_realloc - Implemented simply in terms of mm_malloc and mm_free
  */
-void *mm_realloc(void *ptr, size_t size)
+
+void *mm_realloc(void *bp, size_t size)
 {
-    void *oldptr = ptr;
-    void *newptr;
+    void *oldbp = bp;
+    void *newbp;
     size_t copySize;
     
-    newptr = mm_malloc(size);
-    if (newptr == NULL)
-      return NULL;
-    copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
-    if (size < copySize)
-      copySize = size;
-    memcpy(newptr, oldptr, copySize);
-    mm_free(oldptr);
-    return newptr;
+    if ((newbp = mm_malloc(size)) == NULL) return NULL;
+
+    copySize = GET_SIZE(HP(bp));
+    if (size < copySize) copySize = size;
+    memcpy(newbp, oldbp, copySize);
+    mm_free(oldbp);
+    return newbp;
 }
+
+
+// void *mm_realloc(void *ptr, size_t size)
+// {
+//     void *oldptr = ptr;
+//     void *newptr;
+//     size_t copySize;
+    
+//     newptr = mm_malloc(size);
+//     if (newptr == NULL)
+//       return NULL;
+//     copySize = *(size_t *)((char *)oldptr - SIZE_T_SIZE);
+//     if (size < copySize)
+//       copySize = size;
+//     memcpy(newptr, oldptr, copySize);
+//     mm_free(oldptr);
+//     return newptr;
+// }
 
 static void *coalesce(void *bp)
 {
@@ -188,21 +205,21 @@ static void *coalesce(void *bp)
 
     else if (prev_alloc && !next_alloc) { // case 2
         size += GET_SIZE(HP(NEXT_BLOCK(bp)));
-        PUT(HP(bp), HFPACK(size, 0));
-        PUT(FP(NEXT_BLOCK(bp)), HFPACK(size, 0));
+        PUT(HP(bp), size);
+        PUT(FP(bp), size);
     }
 
     else if (!prev_alloc && next_alloc) { // case 3
         size += GET_SIZE(HP(PREV_BLOCK(bp)));
-        PUT(FP(bp), HFPACK(size, 0));
-        PUT(HP(PREV_BLOCK(bp)), HFPACK(size, 0));
+        PUT(FP(bp), size);
+        PUT(HP(PREV_BLOCK(bp)), size);
         bp = PREV_BLOCK(bp);
     }
     
-    else {                              // case 3
+    else {                              // case 4
         size += GET_SIZE(HP(PREV_BLOCK(bp))) + GET_SIZE(HP(NEXT_BLOCK(bp)));
-        PUT(HP(PREV_BLOCK(bp)), HFPACK(size, 0));
-        PUT(FP(NEXT_BLOCK(bp)), HFPACK(size, 0));
+        PUT(HP(PREV_BLOCK(bp)), size);
+        PUT(FP(NEXT_BLOCK(bp)), size);
         bp = PREV_BLOCK(bp);
     }
     return bp;
@@ -223,12 +240,12 @@ void *find_fit(size_t asize)
 void place(void *bp, size_t asize)
 {
     size_t o_size = GET(HP(bp));
-    if (asize > o_size + 2*DWORD) {
-        PUT(HP(bp), HFPACK(asize,1));
-        char *new_fp = bp + WORD * (asize-2);
-        PUT(new_fp, HFPACK(asize,1));
-        PUT(new_fp+WORD, HFPACK(o_size-asize,0));
-        PUT(FP(bp), HFPACK(o_size-asize,0));
+    if (asize <= o_size - 2*DWORD) {
+        PUT(HP(bp), PACK(asize,1));
+        PUT(FP(bp), PACK(asize,1));
+        bp = NEXT_BLOCK(bp);
+        PUT(HP(bp), PACK(o_size-asize,0));
+        PUT(FP(bp), PACK(o_size-asize,0));
     }
     else {
         *HP(bp) += 1;
