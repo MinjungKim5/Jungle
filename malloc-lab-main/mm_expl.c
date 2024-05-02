@@ -74,6 +74,7 @@ void place(void *bp, size_t asize);
 
 static char* heap_listp;
 static char* last_alloc;
+static char* headbp;
 void *find_nextfit(size_t asize);
 void *find_bestfit(size_t asize);
 
@@ -154,10 +155,13 @@ void *mm_malloc(size_t size)
 void mm_free(void *bp)
 {
     size_t size = GET_SIZE(HP(bp));
-
+    char **freed;
     PUT(HP(bp), PACK(size, 0));
     PUT(FP(bp), PACK(size, 0));
-    last_alloc = coalesce(bp);
+    freed = coalesce(bp);
+    *freed = headbp;
+    headbp = freed;
+    return freed;
 }
 
 /*
