@@ -1,7 +1,26 @@
-<html>
-<head><title>test</title></head>
-<body> 
-<img align="middle" src="godzilla.gif">
-Dave O'Hallaron
-</body>
+<!DOCTYPE html>
+<html lang="ko-KR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>CGI Homepage</title>
+  </head>
+  <body>
+    <h1>Adder.com</h1>
+    <form action="/cgi-bin/adder">
+    <label for="arg1">First Operand</label>
+    <input type="text" id="arg1" name="arg1"><br><br>
+    <label for="arg2">Second Operand</label>
+    <input type="text" id="arg2" name="arg2"><br><br>
+    <input type="submit" value="Submit">
+    </form>
+    <br><br>
+    <h1>HANOI WORLD</h1>
+    <form action="/cgi-bin/hanoi">
+    <label for="arg1">hanoi plate</label>
+    <input type="text" id="arg1" name="arg1"><br><br>
+    <input type="submit" value="Submit">
+    </form>
+  </body>
 </html>
